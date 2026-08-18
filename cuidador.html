@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KidsCare — Portal do Cuidador / Instituição</title>
+<style>
+:root{--pri:#6c5ce7;--pri2:#5a4bd1;--bg:#f4f5fb;--card:#fff;--txt:#2d3436;--mut:#8a8f98;--ok:#00b894;--warn:#fdcb6e;--bad:#e17055;--line:#e6e8f0}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--txt)}.hidden{display:none!important}
+button{cursor:pointer;border:none;border-radius:10px;padding:11px 16px;font-weight:600;font-size:14px}
+.btn{background:var(--pri);color:#fff}.btn:hover{background:var(--pri2)}
+.btn.ghost{background:#eef0ff;color:var(--pri)}.btn.ok{background:var(--ok)}.btn.bad{background:var(--bad)}.btn.sm{padding:7px 11px;font-size:12px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:15px;margin:4px 0 10px;background:#fff}
+label{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+h1{font-size:22px}h2{font-size:17px;margin-bottom:12px}h3{font-size:15px}
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#241f4e,#6c5ce7);padding:16px}
+.login-box{background:#fff;border-radius:20px;padding:36px;width:380px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.login-box .logo{font-size:34px;text-align:center}.login-box h1{text-align:center;margin:6px 0 2px}
+.login-box p{text-align:center;color:var(--mut);font-size:13px;margin-bottom:18px}
+.demo-btns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.demo-btns button{flex:1;min-width:120px;background:#f0f1ff;color:var(--pri);font-size:12px}
+#app{display:flex;min-height:100vh}
+#sidebar{width:235px;background:#241f4e;color:#cfcbea;padding:18px 12px;position:sticky;top:0;height:100vh;flex-shrink:0}
+#sidebar .brand{color:#fff;font-weight:800;font-size:18px;margin:4px 10px 4px}
+#sidebar .sub{color:#9a94d6;font-size:11px;margin:0 10px 18px}
+#sidebar a{display:flex;gap:10px;align-items:center;color:#cfcbea;text-decoration:none;padding:12px;border-radius:10px;font-size:14px;margin-bottom:2px;cursor:pointer}
+#sidebar a.active,#sidebar a:hover{background:var(--pri);color:#fff}
+#sidebar .divider{border-top:1px solid #3a3470;margin:12px 6px}
+#mainWrap{flex:1;display:flex;flex-direction:column;min-width:0}
+#topbar{background:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+#topbar .user{font-size:13px;color:var(--mut);text-align:right}
+#menuBtn{display:none;background:#eef0ff;color:var(--pri);font-size:18px;padding:8px 12px}
+#content{padding:24px;max-width:1200px;width:100%;margin:0 auto}
+#overlay{position:fixed;inset:0;background:rgba(10,5,40,.5);z-index:30;display:none}
+#overlay.show{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(30,30,60,.06)}
+.card .num{font-size:24px;font-weight:800;margin-top:4px}.card .lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(30,30,60,.06);display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+th,td{padding:11px 14px;text-align:left;font-size:13px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{white-space:normal;min-width:90px}
+th{background:#f8f9ff;color:var(--mut);text-transform:uppercase;font-size:11px;letter-spacing:.4px}
+tr:last-child td{border-bottom:none}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-ok{background:#e6fbf5;color:var(--ok)}.b-warn{background:#fff6e0;color:#b7791f}.b-bad{background:#fdecea;color:var(--bad)}.b-mut{background:#eef0f5;color:var(--mut)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.toolbar>div{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.modal{position:fixed;inset:0;background:rgba(20,15,50,.55);display:none;align-items:center;justify-content:center;z-index:60;padding:12px}
+.modal.show{display:flex}.modal-box{background:#fff;border-radius:18px;width:560px;max-width:100%;max-height:92vh;overflow:auto;padding:22px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.modal-head .x{background:#f0f1f5;font-size:16px;padding:6px 12px}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap}
+#toasts{position:fixed;top:12px;right:12px;left:12px;z-index:99;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+.toast{background:#241f4e;color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:tin .3s;max-width:90vw}
+.toast.err{background:var(--bad)}
+@keyframes tin{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+.chat-wrap{display:flex;gap:14px;height:70vh}
+.chat-side{width:230px;background:#fff;border-radius:14px;padding:10px;overflow:auto;flex-shrink:0}
+.chat-side div{padding:11px;border-radius:10px;cursor:pointer;font-size:13px}
+.chat-side div.active,.chat-side div:hover{background:#eef0ff}
+.chat-main{flex:1;display:flex;flex-direction:column;background:#fff;border-radius:14px;min-width:0}
+.chat-msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:78%;padding:10px 14px;border-radius:14px;font-size:14px}
+.msg.me{align-self:flex-end;background:var(--pri);color:#fff}.msg.other{align-self:flex-start;background:#eef0f5}
+.msg small{display:block;font-size:10px;opacity:.7;margin-top:4px}
+.chat-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}.chat-input input{margin:0}
+.receipt h2{margin-bottom:2px}
+.receipt .rline{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line);gap:8px}
+@media print{body *{visibility:hidden}#printArea,#printArea *{visibility:visible}#printArea{position:absolute;inset:0;padding:20px}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media (max-width:900px){
+#sidebar{position:fixed;left:0;top:0;z-index:40;transform:translateX(-105%);transition:transform .25s ease;width:250px}
+#sidebar.open{transform:none;box-shadow:0 0 50px rgba(0,0,0,.45)}
+#menuBtn{display:inline-block}
+#topbar h1{font-size:16px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#topbar .user{font-size:11px}#topbar .user b{display:block}
+#content{padding:14px}.grid2{grid-template-columns:1fr}
+.chat-wrap{flex-direction:column;height:auto}
+.chat-side{width:100%;display:flex;gap:6px;overflow-x:auto;padding:8px}
+.chat-side div{white-space:nowrap;flex:0 0 auto;padding:9px 12px;background:#f4f5fb}
+.chat-main{height:62vh}
+.toolbar{flex-direction:column;align-items:stretch}.toolbar select{margin:0}.cards{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:520px){
+body{font-size:14px}h1{font-size:15px}h2{font-size:15px}
+button{width:100%;padding:13px}.btn.sm{width:auto;padding:8px 12px}#menuBtn{width:auto}
+.modal-foot button{flex:1}.cards{grid-template-columns:1fr 1fr;gap:8px}
+.card{padding:12px}.card .num{font-size:18px}
+th,td{padding:9px 10px;font-size:12px}
+.login-box{padding:24px 18px}.demo-btns button{min-width:100%;font-size:13px;padding:12px}
+.msg{max-width:88%}.chat-input{padding:8px}.chat-input button{width:auto;padding:10px 16px}
+.toolbar>div{flex-direction:column;align-items:stretch}.toolbar select{width:100%}
+.modal-box{padding:16px}#content{padding:12px}
+}
+</style>
+</head>
+<body>
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo">🏫</div>
+    <h1>KidsCare</h1>
+    <p>Portal da Instituição, Educadores e Cuidadores</p>
+    <label>E-mail</label><input id="loginEmail" value="admin@escola.com">
+    <label>Senha</label><input id="loginPass" type="password" value="123456">
+    <button class="btn" style="width:100%" onclick="doLogin()">Entrar</button>
+    <div class="demo-btns">
+      <button onclick="fillLogin('admin@escola.com')">🏫 Instituição</button>
+      <button onclick="fillLogin('educador@escola.com')">👩‍🏫 Educador</button>
+    </div>
+    <p style="margin-top:12px;font-size:11px">Senha demo: <b>123456</b> · <a href="responsavel.html" style="color:var(--pri)">👨‍👩‍👧 Ir para o Portal do Responsável →</a></p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <aside id="sidebar"></aside>
+  <div id="overlay" onclick="closeMenu()"></div>
+  <div id="mainWrap"><header id="topbar"></header><main id="content"></main></div>
+</div>
+
+<div class="modal" id="modal"><div class="modal-box">
+  <div class="modal-head"><h3 id="modalTitle"></h3><button class="x" onclick="closeModal()">×</button></div>
+  <div id="modalBody"></div><div class="modal-foot" id="modalFoot"></div>
+</div></div>
+<div id="toasts"></div><div id="printArea"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const uid=p=>p+'-'+Math.random().toString(36).slice(2,7).toUpperCase();
+const nowISO=()=>new Date().toISOString();
+const fmtBRL=v=>(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const fmtDT=iso=>iso?new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+const fmtD2=iso=>new Date(iso).toLocaleDateString('pt-BR');
+const fmtDur=m=>{m=Math.max(0,m|0);const h=Math.floor(m/60),mm=m%60;return h?h+'h '+String(mm).padStart(2,'0')+'min':mm+'min'};
+const toLocal=iso=>{const d=new Date(iso),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes())};
+function toast(msg,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=msg;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),3500)}
+function openModal(title,body,foot){$('#modalTitle').innerHTML=title;$('#modalBody').innerHTML=body;$('#modalFoot').innerHTML=foot||'';$('#modal').classList.add('show')}
+function closeModal(){$('#modal').classList.remove('show')}
+function toggleMenu(){$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('show')}
+function closeMenu(){$('#sidebar').classList.remove('open');$('#overlay').classList.remove('show')}
+
+let DB=null;
+function save(){localStorage.setItem('kidscare_db_v1',JSON.stringify(DB))}
+function seed(){
+  const now=new Date(),d=n=>new Date(now.getTime()-n*864e5).toISOString();
+  DB={users:[
+    {id:'u1',name:'Ana Souza (Direção)',email:'admin@escola.com',pass:'123456',role:'admin'},
+    {id:'u2',name:'Carlos Lima',email:'educador@escola.com',pass:'123456',role:'educator'},
+    {id:'u3',name:'Mariana Alves',email:'responsavel@email.com',pass:'123456',role:'guardian'},
+    {id:'u4',name:'João Pereira',email:'joao@email.com',pass:'123456',role:'guardian'}],
+  children:[
+    {id:'c1',name:'Sofia Alves',birth:'2021-03-10',group:'Maternal II',allergies:'Amendoim',notes:'',qr:null},
+    {id:'c2',name:'Pedro Alves',birth:'2023-07-22',group:'Berçário',allergies:'',notes:'Soneca às 13h',qr:null},
+    {id:'c3',name:'Lucas Pereira',birth:'2020-11-05',group:'Infantil III',allergies:'',notes:'',qr:null}],
+  guardians:[
+    {id:'g1',userId:'u3',childId:'c1',name:'Mariana Alves',email:'responsavel@email.com',phone:'(11) 98888-0001',financial:true,pickup:true,chat:true},
+    {id:'g2',userId:'u3',childId:'c2',name:'Mariana Alves',email:'responsavel@email.com',phone:'(11) 98888-0001',financial:true,pickup:true,chat:true},
+    {id:'g3',userId:'u4',childId:'c3',name:'João Pereira',email:'joao@email.com',phone:'(11) 97777-0002',financial:true,pickup:true,chat:true}],
+  educators:[{id:'e1',userId:'u2',name:'Carlos Lima',email:'educador@escola.com',roleFuncao:'Educador Infantil'}],
+  sessions:[
+    {id:'s1',childId:'c1',checkIn:d(6),checkOut:d(6),invoiced:true,source:'qr'},
+    {id:'s2',childId:'c1',checkIn:d(5),checkOut:d(5),invoiced:true,source:'manual'},
+    {id:'s3',childId:'c2',checkIn:d(5),checkOut:d(5),invoiced:true,source:'qr'},
+    {id:'s4',childId:'c3',checkIn:new Date(now.getTime()-2*36e5).toISOString(),checkOut:null,invoiced:false,source:'qr'}],
+  invoices:[],messages:[
+    {id:'m1',childId:'c1',fromRole:'educator',fromName:'Carlos Lima',text:'Sofia almoçou muito bem hoje! 😊',time:d(1)},
+    {id:'m2',childId:'c1',fromRole:'guardian',fromName:'Mariana Alves',text:'Que ótimo, obrigada por avisar!',time:d(1)}],
+  reports:[{childId:'c1',date:new Date().toDateString(),meals:true,nap:true,bathroom:true,mood:'😊 Feliz',notes:'Brincou no parque.'}],
+  notifs:[],
+  settings:{institutionName:'Creche Estrela Guia',hourlyRate:25,graceMinutes:10,minimumMinutes:30,rounding:'CEIL_15',nightMultiplier:1.2,weekendMultiplier:1.5,lateFee:2,invoiceDay:1}};
+  const fix=(s,h1,h2)=>{const a=new Date(s.checkIn);a.setHours(h1,7,0,0);s.checkIn=a.toISOString();if(h2){const b=new Date(a);b.setHours(h2,32,0,0);s.checkOut=b.toISOString()}};
+  fix(DB.sessions[0],8,12);fix(DB.sessions[1],13,17);fix(DB.sessions[2],8,11);save();
+}
+function load(){const raw=localStorage.getItem('kidscare_db_v1');if(raw){DB=JSON.parse(raw)}else{seed()}}
+function calcSession(s){
+  const S=DB.settings;const ini=new Date(s.checkIn),out=s.checkOut?new Date(s.checkOut):new Date();
+  const raw=Math.floor((out-ini)/60000);
+  if(raw<=S.graceMinutes)return{raw,bill:0,hours:0,amount:0,mult:1};
+  let bill=raw;
+  if(S.rounding==='CEIL_15')bill=Math.ceil(raw/15)*15;
+  if(S.rounding==='CEIL_30')bill=Math.ceil(raw/30)*30;
+  if(S.rounding==='CEIL_60')bill=Math.ceil(raw/60)*60;
+  if(bill<S.minimumMinutes)bill=S.minimumMinutes;
+  const day=ini.getDay(),h=ini.getHours();let mult=1;
+  if(day===0||day===6)mult*=S.weekendMultiplier;
+  if(h>=18||h<7)mult*=S.nightMultiplier;
+  return{raw,bill,hours:bill/60,amount:+((bill/60)*S.hourlyRate*mult).toFixed(2),mult};
+}
+function notify(text,forRole){DB.notifs.unshift({id:uid('N'),text,forRole:forRole||'all',time:nowISO()});if(DB.notifs.length>50)DB.notifs.pop();save()}
+
+let state={user:null,view:'',chatChild:null,edit:null,repChild:null};
+function fillLogin(e){$('#loginEmail').value=e;$('#loginPass').value='123456'}
+function doLogin(){
+  const u=DB.users.find(u=>u.email===$('#loginEmail').value.trim()&&u.pass===$('#loginPass').value);
+  if(!u)return toast('E-mail ou senha inválidos',1);
+  if(u.role!=='admin'&&u.role!=='educator')return toast('Este portal é para cuidadores/instituição. Use o Portal do Responsável.',1);
+  state.user=u;state.view=u.role==='admin'?'dashboard':'edu_day';
+  $('#loginScreen').classList.add('hidden');$('#app').classList.remove('hidden');render();
+}
+function logout(){state.user=null;closeMenu();$('#app').classList.add('hidden');$('#loginScreen').classList.remove('hidden')}
+
+const NAV={
+  admin:[['dashboard','📊 Dashboard'],['attendance','🕐 Frequência'],['children','🧒 Crianças'],['guardians','👨👩👧 Responsáveis'],['educators','👩‍🏫 Educadores'],['finance','💰 Financeiro'],['chat','💬 Chat'],['settings','⚙️ Configurações']],
+  educator:[['edu_day','🕐 Meu Dia / QR'],['edu_report','📝 Diário de Bordo'],['chat','💬 Chat']]};
+function nav(v){state.view=v;closeMenu();render();window.scrollTo(0,0)}
+function render(){
+  const r=state.user.role;
+  $('#sidebar').innerHTML='<div class="brand">🏫 KidsCare</div><div class="sub">PORTAL DO CUIDADOR</div>'+NAV[r].map(n=>'<a class="'+(state.view===n[0]?'active':'')+'" onclick="nav(\''+n[0]+'\')">'+n[1]+'</a>').join('')+'<div class="divider"></div><a href="responsavel.html">👨‍👩‍👧 Portal do Responsável</a><a onclick="logout()">🚪 Sair</a>';
+  $('#topbar').innerHTML='<button id="menuBtn" onclick="toggleMenu()">☰</button><h1>'+DB.settings.institutionName+'</h1><div class="user">👤 '+state.user.name.split(' ')[0]+'<b>'+(r==='admin'?'Instituição':'Educador')+'</b></div>';
+  const V={dashboard:vDashboard,attendance:vAttendance,children:vChildren,guardians:vGuardians,educators:vEducators,finance:vFinance,chat:vChat,settings:vSettings,edu_day:vEduDay,edu_report:vReport};
+  $('#content').innerHTML=V[state.view]();
+}
+const childName=id=>(DB.children.find(c=>c.id===id)||{}).name||'—';
+const openSession=cid=>DB.sessions.find(s=>s.childId===cid&&!s.checkOut);
+
+function vDashboard(){
+  const today=new Date().toDateString();
+  const todays=DB.sessions.filter(s=>new Date(s.checkIn).toDateString()===today);
+  const present=todays.filter(s=>!s.checkOut);
+  const revenue=todays.reduce((t,s)=>t+calcSession(s).amount,0);
+  const openInv=DB.invoices.filter(i=>i.status!=='paid');
+  let html='<div class="cards"><div class="card"><div class="lbl">Presentes agora</div><div class="num">'+present.length+'</div></div><div class="card"><div class="lbl">Entradas hoje</div><div class="num">'+todays.length+'</div></div><div class="card"><div class="lbl">Receita estimada</div><div class="num">'+fmtBRL(revenue)+'</div></div><div class="card"><div class="lbl">Faturas abertas</div><div class="num">'+openInv.length+'</div></div></div>';
+  html+='<h2>Presentes agora</h2><table><tr><th>Criança</th><th>Entrada</th><th>Tempo</th><th>Valor</th><th></th></tr>';
+  html+=present.map(s=>{const c=calcSession(s);return '<tr><td><b>'+childName(s.childId)+'</b></td><td>'+fmtDT(s.checkIn)+'</td><td>'+fmtDur(c.raw)+'</td><td>'+fmtBRL(c.amount)+'</td><td><button class="btn sm ok" onclick="toggleAttendance(\''+s.childId+'\')">Saída</button></td></tr>'}).join('')||'<tr><td colspan="5">Nenhuma criança presente.</td></tr>';
+  return html+'</table>';
+}
+function vAttendance(){
+  const rows=[...DB.sessions].reverse();
+  let html='<div class="toolbar"><h2>Frequência — Entrada e Saída</h2><div><select id="selChild">'+DB.children.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join('')+'</select><button class="btn" onclick="toggleAttendance($(\'#selChild\').value)">⏱ Entrada/Saída</button></div></div>';
+  html+='<table><tr><th>Criança</th><th>Entrada</th><th>Saída</th><th>Tempo cobrável</th><th>Valor</th><th>Origem</th><th>Ações</th></tr>';
+  html+=rows.map(s=>{const c=calcSession(s);return '<tr><td><b>'+childName(s.childId)+'</b></td><td>'+fmtDT(s.checkIn)+'</td><td>'+(s.checkOut?fmtDT(s.checkOut):'<span class="badge b-ok">PRESENTE</span>')+'</td><td>'+fmtDur(c.bill)+'</td><td>'+fmtBRL(c.amount)+'</td><td><span class="badge b-mut">'+(s.source==='qr'?'QR CODE':'MANUAL')+'</span></td><td><button class="btn sm ghost" onclick="openAdjust(\''+s.id+'\')">✏️</button></td></tr>'}).join('');
+  return html+'</table>';
+}
+function toggleAttendance(cid){
+  const s=openSession(cid);
+  if(s){s.checkOut=nowISO();notify('🚪 Saída registrada: '+childName(cid),'guardian');toast('Saída registrada — '+childName(cid))}
+  else{DB.sessions.push({id:uid('S'),childId:cid,checkIn:nowISO(),checkOut:null,invoiced:false,source:'manual'});notify(' Entrada registrada: '+childName(cid),'guardian');toast('Entrada registrada — '+childName(cid))}
+  save();render();
+}
+function openAdjust(sid){
+  const s=DB.sessions.find(x=>x.id===sid);state.edit=sid;
+  openModal('Ajustar horário — '+childName(s.childId),
+    '<label>Entrada</label><input type="datetime-local" id="aIn" value="'+toLocal(s.checkIn)+'"><label>Saída (vazio = presente)</label><input type="datetime-local" id="aOut" value="'+(s.checkOut?toLocal(s.checkOut):'')+'"><label>Motivo do ajuste</label><input id="aReason" placeholder="ex: esquecimento de registro">',
+    '<button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveAdjust()">Salvar</button>');
+}
+function saveAdjust(){
+  const s=DB.sessions.find(x=>x.id===state.edit);
+  s.checkIn=new Date($('#aIn').value).toISOString();
+  s.checkOut=$('#aOut').value?new Date($('#aOut').value).toISOString():null;
+  s.adjusted=$('#aReason').value||'ajuste manual';
+  save();closeModal();toast('Horário ajustado');render();
+}
+function vChildren(){
+  let html='<div class="toolbar"><h2>Crianças</h2><div><button class="btn" onclick="openChildModal()">+ Nova criança</button></div></div><table><tr><th>Nome</th><th>Turma</th><th>Nascimento</th><th>Alergias</th><th>Status</th><th>Ações</th></tr>';
+  html+=DB.children.map(c=>'<tr><td><b>'+c.name+'</b></td><td>'+c.group+'</td><td>'+c.birth+'</td><td>'+(c.allergies||'—')+'</td><td>'+(openSession(c.id)?'<span class="badge b-ok">PRESENTE</span>':'<span class="badge b-mut">AUSENTE</span>')+'</td><td><button class="btn sm ghost" onclick="openChildModal(\''+c.id+'\')">✏️</button> <button class="btn sm bad" onclick="delChild(\''+c.id+'\')">🗑</button></td></tr>').join('');
+  return html+'</table>';
+}
+function openChildModal(id){
+  const c=id?DB.children.find(x=>x.id===id):{name:'',birth:'',group:'',allergies:'',notes:''};state.edit=id||null;
+  openModal(id?'Editar criança':'Nova criança',
+    '<label>Nome</label><input id="fName" value="'+c.name+'"><div class="grid2"><div><label>Nascimento</label><input type="date" id="fBirth" value="'+c.birth+'"></div><div><label>Turma</label><input id="fGroup" value="'+c.group+'"></div></div><label>Alergias</label><input id="fAlg" value="'+(c.allergies||'')+'"><label>Observações</label><textarea id="fNotes">'+(c.notes||'')+'</textarea>',
+    '<button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveChild()">Salvar</button>');
+}
+function saveChild(){
+  const data={name:$('#fName').value,birth:$('#fBirth').value,group:$('#fGroup').value,allergies:$('#fAlg').value,notes:$('#fNotes').value};
+  if(!data.name)return toast('Informe o nome',1);
+  if(state.edit)Object.assign(DB.children.find(c=>c.id===state.edit),data);
+  else DB.children.push(Object.assign({id:uid('C'),qr:null},data));
+  save();closeModal();toast('Criança salva');render();
+}
+function delChild(id){if(confirm('Excluir '+childName(id)+'?')){DB.children=DB.children.filter(c=>c.id!==id);save();render()}}
+function vGuardians(){
+  let html='<div class="toolbar"><h2>Responsáveis</h2><div><button class="btn" onclick="openGuardianModal()">+ Novo responsável</button></div></div><table><tr><th>Nome</th><th>Criança</th><th>Financeiro</th><th>Retirada</th><th>Chat</th><th>Ações</th></tr>';
+  html+=DB.guardians.map(g=>'<tr><td><b>'+g.name+'</b><br><small style="color:var(--mut)">'+g.email+'</small></td><td>'+childName(g.childId)+'</td><td>'+(g.financial?'✅':'—')+'</td><td>'+(g.pickup?'✅':'—')+'</td><td>'+(g.chat?'✅':'—')+'</td><td><button class="btn sm ghost" onclick="openGuardianModal(\''+g.id+'\')">✏️</button> <button class="btn sm bad" onclick="delGuardian(\''+g.id+'\')">🗑</button></td></tr>').join('');
+  return html+'</table>';
+}
+function openGuardianModal(id){
+  const g=id?DB.guardians.find(x=>x.id===id):{name:'',email:'',phone:'',childId:DB.children[0].id,financial:true,pickup:true,chat:true};state.edit=id||null;
+  openModal(id?'Editar responsável':'Novo responsável',
+    '<label>Nome</label><input id="gName" value="'+g.name+'"><div class="grid2"><div><label>E-mail (login)</label><input id="gEmail" value="'+g.email+'"></div><div><label>Telefone</label><input id="gPhone" value="'+g.phone+'"></div></div><label>Criança</label><select id="gChild">'+DB.children.map(c=>'<option value="'+c.id+'" '+(c.id===g.childId?'selected':'')+'>'+c.name+'</option>').join('')+'</select><label style="display:block;margin:8px 0"><input type="checkbox" id="gFin" style="width:auto" '+(g.financial?'checked':'')+'> Responsável financeiro (recebe cobranças)</label><label style="display:block;margin:8px 0"><input type="checkbox" id="gPick" style="width:auto" '+(g.pickup?'checked':'')+'> Autorizado a retirar a criança</label><label style="display:block;margin:8px 0"><input type="checkbox" id="gChat" style="width:auto" '+(g.chat?'checked':'')+'> Acesso ao chat</label>',
+    '<button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveGuardian()">Salvar</button>');
+}
+function saveGuardian(){
+  const data={name:$('#gName').value,email:$('#gEmail').value,phone:$('#gPhone').value,childId:$('#gChild').value,financial:$('#gFin').checked,pickup:$('#gPick').checked,chat:$('#gChat').checked};
+  if(state.edit)Object.assign(DB.guardians.find(g=>g.id===state.edit),data);
+  else{const id=uid('U');DB.users.push({id,name:data.name,email:data.email,pass:'123456',role:'guardian'});DB.guardians.push(Object.assign({id:uid('G'),userId:id},data))}
+  save();closeModal();toast('Responsável salvo');render();
+}
+function delGuardian(id){if(confirm('Excluir vínculo?')){DB.guardians=DB.guardians.filter(g=>g.id!==id);save();render()}}
+function vEducators(){
+  let html='<div class="toolbar"><h2>Educadores / Cuidadores</h2><div><button class="btn" onclick="openEducatorModal()">+ Novo educador</button></div></div><table><tr><th>Nome</th><th>E-mail</th><th>Função</th><th>Ações</th></tr>';
+  html+=DB.educators.map(e=>'<tr><td><b>'+e.name+'</b></td><td>'+e.email+'</td><td>'+e.roleFuncao+'</td><td><button class="btn sm ghost" onclick="openEducatorModal(\''+e.id+'\')">✏️</button> <button class="btn sm bad" onclick="delEducator(\''+e.id+'\')">🗑</button></td></tr>').join('');
+  return html+'</table>';
+}
+function openEducatorModal(id){
+  const e=id?DB.educators.find(x=>x.id===id):{name:'',email:'',roleFuncao:'Educador Infantil'};state.edit=id||null;
+  openModal('Educador','<label>Nome</label><input id="eName" value="'+e.name+'"><label>E-mail (login)</label><input id="eEmail" value="'+e.email+'"><label>Função</label><input id="eFunc" value="'+e.roleFuncao+'">',
+  '<button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveEducator()">Salvar</button>');
+}
+function saveEducator(){
+  const data={name:$('#eName').value,email:$('#eEmail').value,roleFuncao:$('#eFunc').value};
+  if(state.edit)Object.assign(DB.educators.find(e=>e.id===state.edit),data);
+  else{const id=uid('U');DB.users.push({id,name:data.name,email:data.email,pass:'123456',role:'educator'});DB.educators.push(Object.assign({id:uid('E'),userId:id},data))}
+  save();closeModal();toast('Educador salvo');render();
+}
+function delEducator(id){DB.educators=DB.educators.filter(e=>e.id!==id);save();render()}
+function vFinance(){
+  const S=DB.settings;
+  let html='<div class="cards"><div class="card"><div class="lbl">Valor/hora</div><div class="num">'+fmtBRL(S.hourlyRate)+'</div></div><div class="card"><div class="lbl">Tolerância</div><div class="num">'+S.graceMinutes+' min</div></div><div class="card"><div class="lbl">Mínimo cobrável</div><div class="num" style="font-size:16px">'+fmtDur(S.minimumMinutes)+'</div></div><div class="card"><div class="lbl">Arredondamento</div><div class="num" style="font-size:14px">'+S.rounding+'</div></div></div>';
+  const pend=DB.sessions.filter(s=>s.checkOut&&!s.invoiced);
+  html+='<div class="toolbar"><h2>Sessões a faturar ('+pend.length+')</h2><div>'+(pend.length?'<button class="btn" onclick="genInvoices()">🧾 Gerar faturas e recibos</button>':'')+'</div></div>';
+  if(pend.length){html+='<table><tr><th>Criança</th><th>Data</th><th>Horário</th><th>Valor</th></tr>'+pend.map(s=>{const c=calcSession(s);return '<tr><td>'+childName(s.childId)+'</td><td>'+fmtDT(s.checkIn)+'</td><td>'+fmtDT(s.checkIn)+' → '+fmtDT(s.checkOut)+'</td><td><b>'+fmtBRL(c.amount)+'</b></td></tr>'}).join('')+'</table><br>';}
+  html+='<h2>Faturas emitidas</h2><table><tr><th>Nº</th><th>Responsável</th><th>Criança</th><th>Período</th><th>Total</th><th>Status</th><th>Ações</th></tr>';
+  html+=DB.invoices.map(i=>'<tr><td><b>'+i.number+'</b></td><td>'+i.guardianName+'</td><td>'+i.childrenNames+'</td><td>'+fmtD2(i.periodStart)+' a '+fmtD2(i.periodEnd)+'</td><td><b>'+fmtBRL(i.total)+'</b></td><td>'+invBadge(i.status)+'</td><td><button class="btn sm ghost" onclick="openReceipt(\''+i.id+'\')">🧾</button> '+(i.status!=='paid'?'<button class="btn sm ok" onclick="payInvoice(\''+i.id+'\')">💵</button>':'')+'</td></tr>').join('')||'<tr><td colspan="7">Nenhuma fatura.</td></tr>';
+  return html+'</table>';
+}
+function invBadge(st){return{open:'<span class="badge b-warn">ABERTA</span>',paid:'<span class="badge b-ok">PAGA</span>'}[st]}
+function genInvoices(){
+  const pend=DB.sessions.filter(s=>s.checkOut&&!s.invoiced);
+  if(!pend.length)return toast('Nada a faturar',1);
+  const byChild={};pend.forEach(s=>{(byChild[s.childId]=byChild[s.childId]||[]).push(s)});
+  Object.keys(byChild).forEach(cid=>{
+    const g=DB.guardians.find(x=>x.childId===cid&&x.financial)||DB.guardians.find(x=>x.childId===cid);
+    const items=byChild[cid].map(s=>{const c=calcSession(s);s.invoiced=true;return{date:s.checkIn,desc:fmtDT(s.checkIn)+' → '+fmtDT(s.checkOut)+' · '+fmtDur(c.bill)+(c.mult!==1?' (mult '+c.mult+'x)':''),amount:c.amount}});
+    const total=+items.reduce((t,i)=>t+i.amount,0).toFixed(2);
+    DB.invoices.push({id:uid('I'),number:'F-'+(1000+DB.invoices.length+1),childId:cid,guardianName:g?g.name:'—',childrenNames:childName(cid),periodStart:items[0].date,periodEnd:nowISO(),items,total,status:'open',receiptNo:null});
+    if(g)notify('🧾 Nova fatura '+fmtBRL(total)+' para '+g.name,'guardian');
+  });
+  save();toast('Faturas e recibos gerados!');render();
+}
+function payInvoice(id){
+  const i=DB.invoices.find(x=>x.id===id);i.status='paid';i.paidAt=nowISO();i.receiptNo='R-'+(5000+DB.invoices.length);
+  notify('✅ Pagamento confirmado: '+i.number);save();toast('Pagamento registrado — recibo disponível');render();
+}
+function openReceipt(id){
+  const i=DB.invoices.find(x=>x.id===id);
+  const html='<div class="receipt" id="receiptBox"><h2>🧸 '+DB.settings.institutionName+'</h2><p style="font-size:12px;color:var(--mut)">RECIBO DE COBRANÇA '+i.number+' · Validação: '+i.id+'</p><hr style="margin:10px 0"><div class="rline"><span>Responsável</span><b>'+i.guardianName+'</b></div><div class="rline"><span>Criança</span><b>'+i.childrenNames+'</b></div><div class="rline"><span>Período</span><b>'+fmtD2(i.periodStart)+' a '+fmtD2(i.periodEnd)+'</b></div>'+i.items.map(it=>'<div class="rline"><span>'+it.desc+'</span><b>'+fmtBRL(it.amount)+'</b></div>').join('')+'<div class="rline" style="font-size:16px"><span><b>TOTAL</b></span><b>'+fmtBRL(i.total)+'</b></div><div class="rline"><span>Status</span><b>'+(i.status==='paid'?'PAGO em '+fmtD2(i.paidAt)+' · Recibo '+i.receiptNo:'EM ABERTO')+'</b></div></div>';
+  openModal('Recibo '+i.number,html,'<button class="btn ghost" onclick="closeModal()">Fechar</button><button class="btn" onclick="printReceipt()">🖨 Imprimir / PDF</button>');
+}
+function printReceipt(){$('#printArea').innerHTML=$('#receiptBox').outerHTML;window.print()}
+function vChat(){
+  const rooms=DB.children.map(c=>c.id);
+  if(!rooms.length)return '<h2>💬 Chat</h2>';
+  if(!state.chatChild)state.chatChild=rooms[0];
+  const msgs=DB.messages.filter(m=>m.childId===state.chatChild);
+  return '<div class="toolbar"><h2>💬 Chat — Educadores ↔ Responsáveis</h2></div><div class="chat-wrap"><div class="chat-side">'+rooms.map(cid=>'<div class="'+(cid===state.chatChild?'active':'')+'" onclick="state.chatChild=\''+cid+'\';render()">🧒 '+childName(cid)+'</div>').join('')+'</div><div class="chat-main"><div class="chat-msgs" id="msgs">'+msgs.map(m=>{const me=(m.fromRole===state.user.role);return '<div class="msg '+(me?'me':'other')+'">'+m.text+'<small>'+m.fromName+' · '+fmtDT(m.time)+'</small></div>'}).join('')||'<p style="color:var(--mut);font-size:13px">Sem mensagens ainda.</p>'+'</div><div class="chat-input"><input id="chatTxt" placeholder="Escreva sua mensagem..." onkeydown="if(event.key===\'Enter\')sendChat()"><button class="btn" onclick="sendChat()">➤</button></div></div></div>';
+}
+function sendChat(){
+  const t=$('#chatTxt').value.trim();if(!t)return;
+  DB.messages.push({id:uid('M'),childId:state.chatChild,fromRole:state.user.role,fromName:state.user.name,text:t,time:nowISO()});
+  notify('💬 Nova mensagem de '+state.user.name+' sobre '+childName(state.chatChild),'guardian');
+  save();render();const box=$('#msgs');if(box)box.scrollTop=box.scrollHeight;
+}
+function vSettings(){
+  const S=DB.settings;
+  return '<h2>⚙️ Configurações do Sistema</h2><div class="card" style="max-width:640px"><label>Nome da instituição</label><input id="sName" value="'+S.institutionName+'"><div class="grid2"><div><label>Valor/hora (R$)</label><input type="number" step="0.5" id="sRate" value="'+S.hourlyRate+'"></div><div><label>Tolerância (min)</label><input type="number" id="sGrace" value="'+S.graceMinutes+'"></div></div><div class="grid2"><div><label>Mínimo cobrável (min)</label><input type="number" id="sMin" value="'+S.minimumMinutes+'"></div><div><label>Arredondamento</label><select id="sRound"><option value="EXACT" '+sel(S.rounding,'EXACT')+'>Exato</option><option value="CEIL_15" '+sel(S.rounding,'CEIL_15')+'>Arredondar p/ 15 min</option><option value="CEIL_30" '+sel(S.rounding,'CEIL_30')+'>Arredondar p/ 30 min</option><option value="CEIL_60" '+sel(S.rounding,'CEIL_60')+'>Hora cheia</option></select></div></div><div class="grid2"><div><label>Mult. fim de semana</label><input type="number" step="0.1" id="sWeek" value="'+S.weekendMultiplier+'"></div><div><label>Mult. noturno (18h–7h)</label><input type="number" step="0.1" id="sNight" value="'+S.nightMultiplier+'"></div></div><div class="grid2"><div><label>Multa atraso (%)</label><input type="number" id="sFee" value="'+S.lateFee+'"></div><div><label>Dia fechamento fatura</label><input type="number" id="sDay" value="'+S.invoiceDay+'"></div></div><button class="btn" onclick="saveSettings()">💾 Salvar configurações</button><p style="font-size:12px;color:var(--mut);margin-top:10px">As novas regras passam a valer imediatamente para cálculos, recibos e painéis.</p></div>';
+}
+const sel=(a,b)=>a===b?'selected':'';
+function saveSettings(){
+  Object.assign(DB.settings,{institutionName:$('#sName').value,hourlyRate:+$('#sRate').value,graceMinutes:+$('#sGrace').value,minimumMinutes:+$('#sMin').value,rounding:$('#sRound').value,weekendMultiplier:+$('#sWeek').value,nightMultiplier:+$('#sNight').value,lateFee:+$('#sFee').value,invoiceDay:+$('#sDay').value});
+  save();toast('Configurações salvas ✅');render();
+}
+function vEduDay(){
+  let html='<h2>🕐 Registro de Entrada e Saída</h2><div class="cards"><div class="card"><label style="display:block">Criança</label><select id="eChild">'+DB.children.map(c=>'<option value="'+c.id+'">'+c.name+(openSession(c.id)?' · PRESENTE':'')+'</option>').join('')+'</select><button class="btn" onclick="toggleAttendance($(\'#eChild\').value)">⏱ Registrar Entrada / Saída</button></div><div class="card"><label style="display:block">📷 Leitor de QR Code (simulado)</label><input id="qrScan" placeholder="Cole o código do QR"><button class="btn ok" onclick="scanQR()">📷 Escanear QR</button></div></div>';
+  const present=DB.sessions.filter(s=>!s.checkOut);
+  html+='<h2>Presentes agora</h2><table><tr><th>Criança</th><th>Entrada</th><th>Tempo</th><th>Valor</th><th></th></tr>'+present.map(s=>{const c=calcSession(s);return '<tr><td><b>'+childName(s.childId)+'</b></td><td>'+fmtDT(s.checkIn)+'</td><td>'+fmtDur(c.raw)+'</td><td>'+fmtBRL(c.amount)+'</td><td><button class="btn sm ok" onclick="toggleAttendance(\''+s.childId+'\')">Saída</button></td></tr>'}).join('')||'<tr><td colspan="5">Ninguém presente.</td></tr>'+'</table>';
+  return html;
+}
+function scanQR(){
+  const code=$('#qrScan').value.trim();
+  const child=DB.children.find(c=>c.qr&&c.qr.code===code&&c.qr.exp>Date.now());
+  if(!child)return toast('QR inválido ou expirado',1);
+  toggleAttendance(child.id);
+}
+function vReport(){
+  const today=new Date().toDateString();
+  const cid=(state.repChild&&DB.children.find(c=>c.id===state.repChild))?state.repChild:DB.children[0].id;
+  state.repChild=cid;
+  const r=DB.reports.find(x=>x.childId===cid&&x.date===today)||{meals:false,nap:false,bathroom:false,mood:'',notes:''};
+  let html='<h2>📝 Diário de Bordo</h2><div class="card" style="max-width:640px"><label>Criança</label><select id="rChild" onchange="state.repChild=this.value;render()">'+DB.children.map(c=>'<option value="'+c.id+'" '+(c.id===cid?'selected':'')+'>'+c.name+'</option>').join('')+'</select>';
+  html+='<label style="display:block;margin:8px 0"><input type="checkbox" id="rMeals" style="width:auto" '+(r.meals?'checked':'')+'> 🍽 Alimentou-se bem</label><label style="display:block;margin:8px 0"><input type="checkbox" id="rNap" style="width:auto" '+(r.nap?'checked':'')+'> 😴 Dormiu</label><label style="display:block;margin:8px 0"><input type="checkbox" id="rBath" style="width:auto" '+(r.bathroom?'checked':'')+'> 🚽 Banheiro/troca</label><label>Humor</label><input id="rMood" value="'+(r.mood||'')+'" placeholder="ex: 😊 Feliz"><label>Observações</label><textarea id="rNotes">'+(r.notes||'')+'</textarea><button class="btn" onclick="saveReport(\''+cid+'\')">💾 Salvar diário de hoje</button></div>';
+  return html;
+}
+function saveReport(cid){
+  const today=new Date().toDateString();
+  let r=DB.reports.find(x=>x.childId===cid&&x.date===today);
+  if(!r){r={childId:cid,date:today};DB.reports.push(r)}
+  Object.assign(r,{meals:$('#rMeals').checked,nap:$('#rNap').checked,bathroom:$('#rBath').checked,mood:$('#rMood').value,notes:$('#rNotes').value});
+  notify('📝 Diário de '+childName(cid)+' atualizado','guardian');save();toast('Diário salvo');
+}
+// Sincroniza em tempo real se o portal do responsável estiver aberto em outra aba
+window.addEventListener('storage',e=>{if(e.key==='kidscare_db_v1'&&e.newValue){DB=JSON.parse(e.newValue);if(state.user)render()}});
+load();
+</script>
+</body>
+</html>
