@@ -1,0 +1,14 @@
+{
+  "name": "KidsCare - Portal do Responsável",
+  "short_name": "KidsCare",
+  "description": "Acompanhe seus filhos em tempo real",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f9f7",
+  "theme_color": "#00b894",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
